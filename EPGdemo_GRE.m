@@ -1,4 +1,4 @@
-function om_store = EPGdemo_GRE(alpha,N,dt,rlx)
+function [om_store,echos] = EPGdemo_GRE(alpha,N,TR,rlx)
 %EPGdemo_TSE.m : demonstrates EPG of turbo spin echo sequence
 % with an initial (90,90) pulse followed by N (0,alpha) pulses
 %  alpha : flip angle of 2nd to (N+1)th pulses  
@@ -22,25 +22,22 @@ switch rlx
        seq.T1 = 1000; seq.T2 = 100; % same as in EPG paper for reference
 end 
 
-        
-seq.name = 'Gradient Refocused Echo';
-seq.rf(:,N) = [0,alpha]';
-
-
-% Below is from TSE - to be modified!!!
-seq.time = [0 dt];
-seq.events = {'rf','grad'};
-
+seq.name = 'Gradient Refocused Echo with relaxation';
+seq.rf = repmat([0,alpha]',1,N);
+seq.time = [];
+dt = TR/4;
+seq.events ={};
 for n = 1:N
     seq.events{end+1} = 'rf';
-    seq.events{end+1} = 'grad';
-    seq.events{end+1} = 'grad';
-    seq.time = [seq.time (2*n-1)*dt (2*n)*dt (2*n+1)*dt];
+    for m = 1:4
+        seq.events{end+1} = 'grad';
+    end
+    seq.events{end+1} = 'relax';
+    ts = TR*(n-1);
+    seq.time = [seq.time,ts,ts+dt,ts+2*dt,ts+3*dt,ts+4*dt,ts+4*dt];
 end
-seq.events
-seq.time
-seq.grad = ones(1,2*N+1);
-om_store = EPG_custom(seq,1);
+seq.grad = repmat([-1,1,1,1],1,N);
+[om_store,echos] = EPG_custom(seq,1);
 
 end
 

@@ -9,7 +9,7 @@ seq.grad = [-delk delk delk delk,...
             -delk delk delk delk];
 seq.time = [ 0  5 10 15 20 20,... 
             20 25 30 35 40 40,...
-            40 45 50 55 60 60];
+            40 45 50 55 60 60];% ms
 seq.events ={'rf','grad','grad','grad','grad','relax',...
              'rf','grad','grad','grad','grad','relax',...
              'rf','grad','grad','grad','grad','relax'};
@@ -62,22 +62,29 @@ seq.name = 'TSE variable';
 seq.T1 = 0;
 seq.T2 = 0;
 myom = EPG_custom(seq,1);
+
+%% GRE demo
+clear all
+close all
+[om_store,echos] = EPGdemo_GRE(30,50,20,'wm');
+figure
+stem(echos(:,1),echos(:,2))
 %% Run simulations of TSE with ultra short esp and relaxation effects
 clear all
 close all
-alpha = 120;
-dur = 50;
-esp = 1e-3;
+alpha = 180;
+dur = 15000;
+esp = 1e-3;%%ms
 [om_store_gm,echos_gm] = EPGsim_TSE(alpha,dur,esp,'gm',0,0);
 [om_store_wm,echos_wm] = EPGsim_TSE(alpha,dur,esp,'wm',0,0);
 
 % Plot echos
 figure; hold on
 subplot(2,1,1);stem(echos_gm(:,1),echos_gm(:,2));
-title(sprintf('GM'))
 xlabel('Time(ms)'),ylabel('Echo intensity')
 subplot(2,1,2);stem(echos_wm(:,1),echos_wm(:,2));title('WM')
-xlabel('Time(ms)'),ylabel('Echo intensity')
+xlabel('Time(ms)'),ylabel('Echo intensity');title(sprintf('GM'))
+
 fprintf('Simulating with alpha = %d degrees',alpha)
 fprintf(' and esp = %0.4f ms',esp)
 

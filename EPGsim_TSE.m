@@ -5,9 +5,9 @@ function [om_store,echos] = EPGsim_TSE(alpha,N,esp,rlx,annot,graphics)
 %  N : number of pulses after the initial (90,90) pulse
 %  dt: TR between pulses (also )
 %  rlx: mode of relaxation. 0 - no relaxation; 1 - GM; 2 - WM;
-
-
+% -------------------------------------------------------------
 % Default: no relaxation, no annotation, and no EPG display
+%
 if nargin < 4
     rlx = 'none';
     annot = 0;
@@ -23,6 +23,9 @@ switch rlx
     case 'wm' % white matter
        seq.T1 = 960; seq.T2 = 80; 
      
+    case 'csf'
+        seq.T1 = 3120; seq.T2 = 160;
+        
     case 'default'
        seq.T1 = 1000; seq.T2 = 100; % same as in EPG paper for reference
 end 

@@ -1,11 +1,14 @@
 % Modified by: Sachin A B Anchan
 % Date: 30 June 2014
 % Modified by: Gehua Tong
-% Date: 09 Oct 2018
+% Date: 15 Oct 2018
 function omega_new = shift_grad(delk,omega)
 % Shift applies to only F+ and F-* as it does not dephase in z
 % check size of previous omega to determine the effect - test multiple
 % times
+
+% delk: integer describing discretely modelled change in k
+% omega: inputted omega matrix (with columns of [F+,F-,Z]')
 
 [m,n] = size(omega); %previous time point
 % if(m~=3)

@@ -62,7 +62,7 @@ echos = unique(echos,'rows');
 %% Display
 if graphics % if graphic option is on
     display_epg(om_store,seq,annot); % displays epg
-    display_seq(seq);% displays simplified pulse sequence
+    %display_seq(seq);% displays simplified pulse sequence
 end
 end
 

@@ -11,7 +11,10 @@ kmax = size(om_store{length(om_store)},2);
 kstates = -kmax+1:kmax-1; 
 grad_cnt =1; % indexing gradient
 rf_cnt=1; % indexing rf pulse
-seq.time_unique = unique(seq.time);%treating rf pulses as instantaneous
+timing = seq.time;
+uniqtimes = unique(timing);
+grad = seq.grad;
+%seq.time_unique = unique(seq.time);%treating rf pulses as instantaneous
 % extracts unique times in increasing order
 %% For t==0 case - must be true for all sequences
 figure; hold on; grid on;
@@ -24,7 +27,7 @@ flip = seq.rf(:,rf_cnt).'; % why .'???
 text(t(1),kmax-1,['(',num2str(flip(1)), '^{\circ}',',',num2str(flip(2)),'^{\circ}',')'] ,'FontSize',10);
 rf_cnt = rf_cnt + 1;
 % set axis for entire graph
-axis ([0 seq.time(end) -kmax+1 kmax-1]);
+axis ([0 timing(end) -kmax+1 kmax-1]);
 %% For t > 0, plot on!
 for seq_read =2:length(seq.events) % for all events after the first pulse
 % Get data
@@ -67,8 +70,8 @@ for seq_read =2:length(seq.events) % for all events after the first pulse
              for k=1:length(Fpp_kstates) % for each +k state
                 % Fp_plot = [Fpp_kstates(k) Fpp_kstates(k)+1];
                 % vertical locations - [last_k, last_k + grad(in units of delk)]  
-                  Fp_plot = [Fpp_kstates(k) Fpp_kstates(k)+seq.grad(grad_cnt-1)];
-                  t =  [seq.time_unique(grad_cnt-1)  seq.time_unique(grad_cnt)];
+                  Fp_plot = [Fpp_kstates(k) Fpp_kstates(k)+grad(grad_cnt-1)];
+                  t =  [uniqtimes(grad_cnt-1)  uniqtimes(grad_cnt)];
                   plot(t,Fp_plot,'k-');hold on;
                   %-----------------------------------------------------------------
                   %Anotation of config. state value (a complex number for each line)
@@ -86,8 +89,8 @@ for seq_read =2:length(seq.events) % for all events after the first pulse
              Fmp_kstates= -1*(find(abs(Fmp)> 5*eps) -1);
              for k=1:length(Fmp_kstates)
                 %Fp_plot = [Fmp_kstates(k) Fmp_kstates(k)+1];
-                 Fp_plot = [Fmp_kstates(k) Fmp_kstates(k)+seq.grad(grad_cnt-1)];
-                 t =  [seq.time_unique(grad_cnt-1)  seq.time_unique(grad_cnt)];
+                 Fp_plot = [Fmp_kstates(k) Fmp_kstates(k)+grad(grad_cnt-1)];
+                 t =  [uniqtimes(grad_cnt-1)  uniqtimes(grad_cnt)];
                  plot(t,Fp_plot,'k-');hold on;
                  
                  % Echos
@@ -111,7 +114,7 @@ for seq_read =2:length(seq.events) % for all events after the first pulse
              Zp_kstates= (find(abs(Zp)> 5*eps) -1); 
              for k=1:length(Zp_kstates)
                  Fp_plot = [Zp_kstates(k) Zp_kstates(k)];
-                 t =  [seq.time_unique(grad_cnt-1)  seq.time_unique(grad_cnt)];
+                 t =  [uniqtimes(grad_cnt-1)  uniqtimes(grad_cnt)];
                  plot(t,Fp_plot,'--k');hold on;
 
                  if(annot==1) 
@@ -124,7 +127,24 @@ for seq_read =2:length(seq.events) % for all events after the first pulse
              end
     end                
 end
-axis ([0 seq.time(end)  -kmax+1 kmax-1]);
+
+axis ([0 timing(end)  -kmax+1 kmax-1]);
 title(seq.name,'fontsize',18);
 xlabel('Time (ms)','fontsize',15);ylabel('k states','fontsize',15);
 grid on;
+
+%% Plot gradient 
+baseline = -kmax-1;
+M = length(uniqtimes);
+for m = 2:M
+    if grad(m-1)>0
+       col = 'g';
+
+    else
+       col = 'r';
+    end
+    area([uniqtimes(m-1),uniqtimes(m)],...
+        [baseline+grad(m-1),baseline+grad(m-1)],'FaceColor',col,'BASEVALUE',baseline)
+    
+end
+axis ([0 timing(end)  -kmax-1-max(abs(grad)) kmax-1]);

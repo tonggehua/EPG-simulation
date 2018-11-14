@@ -1,20 +1,14 @@
-function [om_store,echos] = EPG_custom(seq,annot,graphics)
-%% EPG_custom.m:  performs EPG simulation of a general pulse sequence
-% Gehua Tong
-%inputs:
-% seq: sequence struct with the required fields, listed below
-% annot: set to 1 to annotate config. state values
-% graphics: set to 1 to display EPG
-
-
-%% Default options
-if nargin == 1
-    annot = 1;
-    graphics = 1;
-elseif nargin ==2
-    graphics = 1;
-end
-
+function [om_store,echoes] = EPG_custom(seq)
+%EPG_custom
+% Performs EPG simulation of a general pulse sequence
+% INPUTS 
+%     seq: sequence struct with the required fields
+%         seq.rf - 2xn matrix with each col = [phi,alpha]'
+%         seq.grad - vector of gradient strengths. Each time interval
+%                    must have a nonempty gradient
+%         seq.events - cell of chars: 'rf','grad', or 'relax'
+%         seq.timing - vector of timing for each event in seq.events
+%         seq.T1, seq.T2 : T1 and T2 values for relaxation (0 for no relaxation)
 %%  Inputs
 % These are the seq fields that need to be populated outside of the
 % EPG_custom() function
@@ -50,19 +44,8 @@ for n = 1:N
    om_store{om_index} = omega;
    om_index = om_index + 1;
 end
-echos = [];
-% need to find echos from stored omegas
-for v = 1:length(om_store)
-    if abs(om_store{v}(1,1)) > 5*eps
-        newecho = [timing(v),abs(om_store{v}(1,1))];
-        echos = [echos;newecho]; % [time of echo, intensity of echo]
-    end
-end
-echos = unique(echos,'rows');
-%% Display
-if graphics % if graphic option is on
-    display_epg(om_store,seq,annot); % displays epg
-    %display_seq(seq);% displays simplified pulse sequence
-end
+% Find and store echos
+echoes = findEchoes(seq,om_store);
+
 end
 

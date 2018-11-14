@@ -1,37 +1,46 @@
-function display_epg(om_store,seq,annot)
-% Displays extended phase graph (EPG) given config. state values and pulse sequence
+function display_epg(om_store,seq,annot,ax)
+%DISPLAY_EPG(om_store, seq, annot, ax)
+% Displays extended phase graph (EPG) given configiration state values and
+% pulse sequence.
+%
 % om_store: cell array of config. state history, genereated by EPG_custom.m
-%           or demos (EPG_GRE.m and EPG_TSE.m) 
-% seq: struct containing sequence information
-% name: string 
+% seq: struct containing sequence information (see EPG_custom.m)
+% annot: 1 or 0, whether to display k-state populations
+% (OPTIONAL ax: axis to display on); if none, it defaults to a new figure
+
 % Created by Sairam Geethanath
-% Modified by Gehua Tong, Oct 8 2018
-T = length(om_store); % number of k-states (>=0) 
+% Modified by Gehua Tong, Nov 14 2018
+
 kmax = size(om_store{length(om_store)},2);
-kstates = -kmax+1:kmax-1; 
+if kmax ~= 1
+    kstates = -kmax+1:kmax-1; 
+else 
+    kstates = [-1,1];
+end
 grad_cnt =1; % indexing gradient
 rf_cnt=1; % indexing rf pulse
-timing = seq.time;
+timing = seq.time; 
 uniqtimes = unique(timing);
 grad = seq.grad;
-%seq.time_unique = unique(seq.time);%treating rf pulses as instantaneous
-% extracts unique times in increasing order
+
+if nargin < 4
+    ax = gca;
+end
 %% For t==0 case - must be true for all sequences
-figure; hold on; grid on;
 % Plot horizontal axis (k=0)
-plot([0 seq.time(end)],[0 0],'-k','LineWidth',1.5)
+plot(ax,[0 seq.time(end)],[0 0],'-k','LineWidth',1.5)
 % Plot first RF pulse
 t=0.*ones(1,length(kstates));
-plot(t,kstates,'-','Color',[0.5 0.5 0.5],'LineWidth',3);
+plot(ax,t,kstates,'-','Color',[0.5 0.5 0.5],'LineWidth',3);
 flip = seq.rf(:,rf_cnt).'; % why .'???
-text(t(1),kmax-1,['(',num2str(flip(1)), '^{\circ}',',',num2str(flip(2)),'^{\circ}',')'] ,'FontSize',10);
+text(ax,t(1),kmax-1,['(',num2str(flip(1)), '^{\circ}',',',num2str(flip(2)),'^{\circ}',')'] ,'FontSize',10);
 rf_cnt = rf_cnt + 1;
 % set axis for entire graph
-axis ([0 timing(end) -kmax+1 kmax-1]);
+%axis(ax,[0 timing(end) -kmax+1 kmax-1]);
 %% For t > 0, plot on!
-for seq_read =2:length(seq.events) % for all events after the first pulse
+for seq_read = 2:length(seq.events) % for all events after the first pulse
 % Get data
-%              om_current = omega{seq_read};
+%           om_current = omega{seq_read};
             om_past  = om_store{seq_read -1};
             
             % Fp - states - 
@@ -51,10 +60,10 @@ for seq_read =2:length(seq.events) % for all events after the first pulse
         case 'rf' %exchanges populations among three states; depict only 2
             % Draw vertical line spanning all k-states
             t = seq.time(seq_read).*ones(1,length(kstates));
-            plot(t,kstates,'Color',[0.5 0.5 0.5],'LineWidth',3); hold on; 
+            plot(ax,t,kstates,'Color',[0.5 0.5 0.5],'LineWidth',3); hold on; 
             % Get and label RF angles
             flip = seq.rf(:,rf_cnt).';
-            text(t(1),kmax-1,['(',num2str(flip(1)), '^{\circ}', ... 
+            text(ax,t(1),max(kmax-1,1),['(',num2str(flip(1)), '^{\circ}', ... 
                 ',',num2str(flip(2)),'^{\circ}',')'] ,'FontSize',10);
             % Increase RF count
             rf_cnt = rf_cnt + 1;
@@ -63,24 +72,18 @@ for seq_read =2:length(seq.events) % for all events after the first pulse
         case 'grad' % important: at a given time, grad always happens before rf
              % Increase gradient count
              grad_cnt = grad_cnt + 1;
-             
              %(+) Fp state plot
-             Fpp_kstates= find(abs(Fpp)> 5*eps) -1; % find "nonzero" states
-             
+             Fpp_kstates= find(abs(Fpp)> 5*eps) -1; % find nonzero states
              for k=1:length(Fpp_kstates) % for each +k state
-                % Fp_plot = [Fpp_kstates(k) Fpp_kstates(k)+1];
                 % vertical locations - [last_k, last_k + grad(in units of delk)]  
                   Fp_plot = [Fpp_kstates(k) Fpp_kstates(k)+grad(grad_cnt-1)];
                   t =  [uniqtimes(grad_cnt-1)  uniqtimes(grad_cnt)];
-                  plot(t,Fp_plot,'k-');hold on;
+                  plot(ax,t,Fp_plot,'k-');hold on;
                   %-----------------------------------------------------------------
                   %Anotation of config. state value (a complex number for each line)
                   if(annot==1) 
-                     
-                     %intensity_r = real(Fpp(Fpp_kstates(k)+1)) - mod(real(Fpp(Fpp_kstates(k)+1)),1e-2);
-                     %intensity_i = imag(Fpp(Fpp_kstates(k)+1)) - mod(imag(Fpp(Fpp_kstates(k)+1)),1e-2);
                      intensity = round(Fpp(Fpp_kstates(k)+1)*100)/100;
-                     text(t(1),Fp_plot(1)+0.5,num2str(intensity),...
+                     text(ax,t(1),Fp_plot(1)+0.5,num2str(intensity),...
                               'Color',[0.01 0.58 0.53],'FontSize',9);
                   end
                   %-----------------------------------------------------------------
@@ -88,25 +91,21 @@ for seq_read =2:length(seq.events) % for all events after the first pulse
              %(-) Fm state plot
              Fmp_kstates= -1*(find(abs(Fmp)> 5*eps) -1);
              for k=1:length(Fmp_kstates)
-                %Fp_plot = [Fmp_kstates(k) Fmp_kstates(k)+1];
                  Fp_plot = [Fmp_kstates(k) Fmp_kstates(k)+grad(grad_cnt-1)];
                  t =  [uniqtimes(grad_cnt-1)  uniqtimes(grad_cnt)];
-                 plot(t,Fp_plot,'k-');hold on;
+                 plot(ax,t,Fp_plot,'k-');hold on;
                  
                  % Echos
                  Fmp_echo = find(Fp_plot==0,1);
                  if ~isempty(Fmp_echo)
-                     plot(t(Fmp_echo), 0, '--ro','LineWidth',2,...
+                     plot(ax,t(Fmp_echo), 0, '--ro','LineWidth',2,...
                                     'MarkerEdgeColor','k',...
                                     'MarkerFaceColor','g',...
                                     'MarkerSize',10);
                  end
                  if(annot==1)
-                     %Fmp_kstates= (find(abs(Fmp)> 5*eps) -1); 
-                     %intensity_r = real(Fmp(-Fmp_kstates(k)+1)) - mod(real(Fmp(-Fmp_kstates(k)+1)),1e-2);
-                     %intensity_i = imag(Fmp(-Fmp_kstates(k)+1)) - mod(imag(Fmp(-Fmp_kstates(k)+1)),1e-2);
                      intensity = round(Fmp(-Fmp_kstates(k)+1)*100)/100;
-                     text(t(1),Fp_plot(1)-0.5,num2str(intensity),...
+                     text(ax,t(1),Fp_plot(1)-0.5,num2str(intensity),...
                                'Color',[0.02 0.02 0.67],'FontSize',9);
                  end    
              end
@@ -115,36 +114,42 @@ for seq_read =2:length(seq.events) % for all events after the first pulse
              for k=1:length(Zp_kstates)
                  Fp_plot = [Zp_kstates(k) Zp_kstates(k)];
                  t =  [uniqtimes(grad_cnt-1)  uniqtimes(grad_cnt)];
-                 plot(t,Fp_plot,'--k');hold on;
+                 plot(ax,t,Fp_plot,'--k');hold on;
 
                  if(annot==1) 
                  %   intensity_r = real(Zp(Zp_kstates(k)+1)) - mod(real(Zp(Zp_kstates(k)+1)),1e-2);
                  %   intensity_i = imag(Zp(Zp_kstates(k)+1)) - mod(imag(Zp(Zp_kstates(k)+1)),1e-2);
                      intensity = round(Zp(Zp_kstates(k)+1)*100)/100; 
-                 text(t(1),Fp_plot(1),num2str(intensity),...
+                 text(ax,t(1),Fp_plot(1),num2str(intensity),...
                            'Color',[1 0.47 0.42],'FontSize',9);
                  end
              end
     end                
 end
 
-axis ([0 timing(end)  -kmax+1 kmax-1]);
-title(seq.name,'fontsize',18);
-xlabel('Time (ms)','fontsize',15);ylabel('k states','fontsize',15);
-grid on;
+title(ax,seq.name,'fontsize',12);
+xlabel(ax,'Time (ms)','fontsize',12);ylabel(ax,'k states','fontsize',12);
+grid(ax,'ON');
 
 %% Plot gradient 
 baseline = -kmax-1;
 M = length(uniqtimes);
 for m = 2:M
     if grad(m-1)>0
-       col = 'g';
-
+       col = 'g'; % positive gradient in green
     else
-       col = 'r';
+       col = 'r'; % negative gradient in red
     end
-    area([uniqtimes(m-1),uniqtimes(m)],...
+    area(ax,[uniqtimes(m-1),uniqtimes(m)],...
         [baseline+grad(m-1),baseline+grad(m-1)],'FaceColor',col,'BASEVALUE',baseline)
     
 end
-axis ([0 timing(end)  -kmax-1-max(abs(grad)) kmax-1]);
+% kmax here is the # columns in the last omega matrix
+% so if kmax is 1, it means no nonzero gradients were used.  
+if kmax == 1
+    axis(ax,[0 timing(end) -1 1]);
+else 
+    axis(ax,[0 timing(end)  -kmax-1-max(abs(grad)) kmax-1]);
+end
+
+xticks(ax,uniqtimes)

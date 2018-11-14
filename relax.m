@@ -1,10 +1,13 @@
 function omega_new = relax(tau,T1,T2,omega)
+%relax(tau,T1,T2,omega)
 %relax.m: updates omega with relaxation effects
-% Gehua Tong, Oct 7 2018
 % INPUTS
 %   tau: duration of relaxation in ms
 %   T1,T2: time constants in ms
 %   omega: the input (3 x n) matrix of k-states
+
+% Gehua Tong, Oct 7 2018
+
 if size(omega,1) ~= 3
     error('Size of k-state matrix incorrect. Input needs to be (3 x n)')
 end

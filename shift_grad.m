@@ -1,8 +1,10 @@
+
+function omega_new = shift_grad(delk,omega)
+%SHIFT_GRAD(delk,omega)
 % Modified by: Sachin A B Anchan
 % Date: 30 June 2014
 % Modified by: Gehua Tong
 % Date: 15 Oct 2018
-function omega_new = shift_grad(delk,omega)
 % Shift applies to only F+ and F-* as it does not dephase in z
 % check size of previous omega to determine the effect - test multiple
 % times
@@ -14,7 +16,9 @@ function omega_new = shift_grad(delk,omega)
 % if(m~=3)
 %     error('Still implementing equation 26, please use 3xk');
 % end
-
+if delk == 0
+    omega_new = omega;
+else
 if(n>1) % typical case: an RF pulse has happened and we have transverse components
     F = [fliplr(omega(1,:)) squeeze((omega(2,2:end)))]; %arrange to make it like eq 27
         % Negative shift
@@ -55,3 +59,4 @@ else % n = 1; this happens if pulse sequence starts with nonzero transverse
 end
 
 omega_new = [Fp;Fm;Z];
+end

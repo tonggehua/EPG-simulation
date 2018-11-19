@@ -1,13 +1,14 @@
 function [om_store,echoes,seq] = EPGsim_TSE(alpha,N,esp,use_y90,rlx)
-%EPGdemo_TSE.m : demonstrates EPG of turbo spin echo sequence
-% with an initial (90,90) pulse followed by N (0,alpha) pulses
+%[om_store,echoes,seq] = EPGsim_TSE(alphas,N,esp,use_y90,rlx)
+% Simulates EPG of Turbo Spin Echo sequence with an initial 
+%                 (90,90) pulse followed by N (0,alpha) pulses
 %  alpha : flip angle of 2nd to (N+1)th pulses  
 %  N : number of pulses after the initial (90,90) pulse
-%  dt: TR between pulses (also )
+%  esp: TR between pulses (also )
+%  use_y90: boolean indicating whether we use a (90,90) pulse at the
+%           beginning (if false, all pulses are (0,alpha))
 %  rlx: mode of relaxation
-% -------------------------------------------------------------
-% Default: no relaxation, no annotation, and no EPG display
-%
+
 if nargin < 4
     use_y90 = 1;
     rlx = 'none';

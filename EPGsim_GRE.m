@@ -1,12 +1,15 @@
 function [om_store,echoes,seq] = EPGsim_GRE(alpha,N,TR,rlx)
-%EPGsim_GRE.m EPG simulation of simple GRE 
+%[om_store,echoes,seq] = EPGsim_GRE(alpha,N,TR,rlx)
+% EPG simulation of simple GRE 
+% 
 % The same RF phase (=0) & flip angle is repeated at each TR
 %     starting from t = 0
 % alpha : flip angle
 % N : number of RF pulses
 % TR : interval between neighboring RF pulses
-% rlx: relaxation mode. Default is no relaxation
-
+% rlx: relaxation mode. Default is no relaxation.
+%
+% Gehua Tong, Nov 19 2018
 
 if nargin < 4
     rlx = 'none';

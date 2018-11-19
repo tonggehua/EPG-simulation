@@ -1,17 +1,24 @@
 function [om_store,echoes] = EPG_custom(seq)
-%EPG_custom
+%[om_store,echoes] = EPG_custom(seq)
 % Performs EPG simulation of a general pulse sequence
 % INPUTS 
 %     seq: sequence struct with the required fields
-%         seq.rf - 2xn matrix with each col = [phi,alpha]'
-%         seq.grad - vector of gradient strengths. Each time interval
-%                    must have a nonempty gradient
-%         seq.events - cell of chars: 'rf','grad', or 'relax'
-%         seq.timing - vector of timing for each event in seq.events
-%         seq.T1, seq.T2 : T1 and T2 values for relaxation (0 for no relaxation)
+%         seq.rf - 2 x P matrix with each column = [phi,alpha]'
+%         seq.grad - vector of k-shifts (must be integers)
+%         seq.events - cell of strings: 'rf','grad', or 'relax'
+%         seq.time - vector of timing for each event in seq.events
+%         seq.T1, seq.T2 : T1 and T2 values for relaxation 
+%                         (set both to 0 for no relaxation)
+% OUTPUTS
+%
+%      om_store - 1 x Q cell array of matrices with size (3 x K).
+%      Each matrix is a record of configuration states (F+(k),F-(k),Z(k)
+%      at all k's generated up to that point. Each matrix corresponds to
+%      the elements in seq.events and seq.timing at the same index.
+%
+%      echoes - output of echo information using findEchoes 
+
 %%  Inputs
-% These are the seq fields that need to be populated outside of the
-% EPG_custom() function
 rf = seq.rf;
 grad = seq.grad;
 timing = seq.time; % in ms

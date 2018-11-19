@@ -1,11 +1,23 @@
-function [om_store,echoes,seq] = EPGsim_HE(RFseq,esp,rlx)
+function [om_store,echoes,seq] = EPGsim_HE(rf,esp,rlx)
+%[om_store,echoes,seq] = EPGsim_HE(RFseq,esp,rlx)
 % Generates EPG for the hyperecho pulse sequence, a sensitive test for
-% the accuracy of the EPG framework.
-% Gehua Tong, Oct 22 2018
+% the accuracy of the EPG framework. With an initial 90 pulse and 
+% a midway 180 pulse, the hyperecho sequence mirror the phase, flip
+% angle, and timing of the first half in the second half to generate a
+% perfect echo (if relaxation is neglected) at the end of the sequence.
+%
+% 
+% INPUTS
+%       rf - 2 x N matrix representing N arbitrary RF pulses
+%            which are reversed for the second half of the sequence
+%       esp - spacing between RF pulses
+%       rlx - relaxation ([T1,T2]; set to [0,0] for no relxation)
 % alphas : length m array of flip angles.
 % TR: spacing between RF pulses
 % rlx: mode of relaxation. Default : no relaxation
-% -------------------------------------------------------------
+%
+% Gehua Tong, Nov 19 2018
+
 
 if nargin < 3
     rlx = 'none';
@@ -36,9 +48,9 @@ end
 seq.name = 'Hyperecho test';
 
 dt = esp/2;
-m = size(RFseq,2);
+m = size(rf,2);
 N = 4*m + 2; % number of time intervals
-seq.rf = [[90 90]',RFseq,[0 180]',fliplr(-RFseq)];
+seq.rf = [[90 90]',rf,[0 180]',fliplr(-rf)];
 seq.time = [0 dt];
 seq.events = {'rf','grad'};
 

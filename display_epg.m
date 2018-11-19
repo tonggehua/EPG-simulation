@@ -6,7 +6,7 @@ function display_epg(om_store,seq,annot,ax)
 % om_store: cell array of config. state history, genereated by EPG_custom.m
 % seq: struct containing sequence information (see EPG_custom.m)
 % annot: 1 or 0, whether to display k-state populations
-% (OPTIONAL ax: axis to display on); if none, it defaults to a new figure
+% ax: axis to display on (optional); if none, it defaults to a new figure
 
 % Created by Sairam Geethanath
 % Modified by Gehua Tong, Nov 14 2018
@@ -29,6 +29,7 @@ end
 %% For t==0 case - must be true for all sequences
 % Plot horizontal axis (k=0)
 plot(ax,[0 seq.time(end)],[0 0],'-k','LineWidth',1.5)
+hold on
 % Plot first RF pulse
 t=0.*ones(1,length(kstates));
 plot(ax,t,kstates,'-','Color',[0.5 0.5 0.5],'LineWidth',3);
@@ -117,10 +118,8 @@ for seq_read = 2:length(seq.events) % for all events after the first pulse
                  plot(ax,t,Fp_plot,'--k');hold on;
 
                  if(annot==1) 
-                 %   intensity_r = real(Zp(Zp_kstates(k)+1)) - mod(real(Zp(Zp_kstates(k)+1)),1e-2);
-                 %   intensity_i = imag(Zp(Zp_kstates(k)+1)) - mod(imag(Zp(Zp_kstates(k)+1)),1e-2);
                      intensity = round(Zp(Zp_kstates(k)+1)*100)/100; 
-                 text(ax,t(1),Fp_plot(1),num2str(intensity),...
+                     text(ax,t(1),Fp_plot(1),num2str(intensity),...
                            'Color',[1 0.47 0.42],'FontSize',9);
                  end
              end

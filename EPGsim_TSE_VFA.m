@@ -1,11 +1,11 @@
-% EPGsim_TSE_VFA.m
-% Simulates variable flip angle (VFA) EPG with TSE scheme
-
 function [om_store,echoes,seq] = EPGsim_TSE_VFA(alphas,esp,rlx)
+% [om_store, echoes, seq] = EPGsim_TSE_VFA(alphas,esp,rlx)
+% Simulates variable flip angle (VFA) EPG with TSE scheme
 % Note: 
 %    (1) First pulse is always (90,90) to keep T(alpha) real
-%    (2) TSE RF spacing:esp/2, esp, esp, esp, ....
-%    (3) This is used to test VFA
+%    (2) TSE RF spacing:esp/2, esp, esp, esp, .... (in milliseconds)
+%    (3) 2nd to last pulses are specified by alphass
+%    (4) rlx = [T1 T2] (set both to zero for no relaxation)
 
 T1 = rlx(1); T2 = rlx(2);
 N = length(alphas);

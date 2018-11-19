@@ -1,5 +1,18 @@
 function [om_store,echoes,seq] = EPGsim_GREsimple_ng(alpha,N,TR,rlx)
-% N must be even (if odd, it will be N+1)
+% [om_store,echoes,seq] = EPGsim_GREsimple_ng(alpha,N,TR,rlx)
+% INPUTS (RF phase is always 0)
+%       alpha - flip angle
+%       N - number of RF pulses
+%       TR - interval between RF pulses
+%       rlx - relaxation mode ([T1,T2])
+% Simulates repeated excitation (same phase and flip angle at same interval)
+% without gradients. The result cannot be visualized as an EPG, but echoes
+% can be plotted.
+%
+% Gehua Tong, Nov 19 2018
+
+
+
 seq.T1 = rlx(1);
 seq.T2 = rlx(2);
 seq.name = 'No gradient SSFP-GR';
